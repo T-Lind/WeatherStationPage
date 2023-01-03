@@ -1,3 +1,4 @@
+import queue
 import time
 from string import Template
 import random
@@ -10,6 +11,8 @@ template: Template
 file = codecs.open("BaseWebpage.html", 'r', "utf-8")
 base_page = file.read()
 file.close()
+
+past_info = []
 
 template = Template(base_page)
 
@@ -38,15 +41,29 @@ def get_humidity():
 def get_closest_lightning():
     return random.randrange(-1, 3)
 
+def format_past_info():
+    ret_str = ""
+    for entry in past_info:
+        ret_str = entry+ret_str
+    return ret_str
 
 def update_webpage():
     global template, write_file
     # Substitute variables into the template
     open_webpage()
     write_file.write("\b"*len(write_file.read()))
-    result = template.substitute(temp=get_temperature(), humidity=get_humidity(),
-                                 pressure=get_pressure(), lightning=get_closest_lightning(),
-                                 time=time.ctime())
+    str_date = time.ctime()
+    temp = get_temperature()
+    humidity = get_humidity()
+    pressure = get_pressure()
+    lightning = get_closest_lightning()
+
+    result = template.substitute(temp=temp, humidity=humidity,
+                                 pressure=pressure, lightning=lightning,
+                                 time=str_date, previous_data=format_past_info())
+    past_info.append(f"Time: {str_date}, Temperature: {temp}, Pressure: {pressure}, Lightning: {lightning}<p></p>")
+    if len(past_info) > 60:
+        past_info.pop(0)
     write_file.write(result)
     close_webpage()
 
