@@ -4,6 +4,8 @@ from string import Template
 import random
 import codecs
 
+MAX_RECORDED_DATA = 24
+
 base_page: str
 write_file: codecs.StreamReaderWriter
 template: Template
@@ -51,7 +53,6 @@ def update_webpage():
     global template, write_file
     # Substitute variables into the template
     open_webpage()
-    write_file.write("\b"*len(write_file.read()))
     str_date = time.ctime()
     temp = get_temperature()
     humidity = get_humidity()
@@ -62,7 +63,7 @@ def update_webpage():
                                  pressure=pressure, lightning=lightning,
                                  time=str_date, previous_data=format_past_info())
     past_info.append(f"Time: {str_date}, Temperature: {temp}, Pressure: {pressure}, Lightning: {lightning}<p></p>")
-    if len(past_info) > 60:
+    if len(past_info) > MAX_RECORDED_DATA:
         past_info.pop(0)
     write_file.write(result)
     close_webpage()
